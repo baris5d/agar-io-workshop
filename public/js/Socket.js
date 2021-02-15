@@ -48,6 +48,7 @@ socket.on("start", (data) => {
   paused = false;
 
   document.getElementById("playersStats").style.display = "block";
+  document.getElementById("playerList").style.display = "block";
 
   console.log(players);
 });
@@ -66,6 +67,8 @@ socket.on("update_blobs", (data) => {
 socket.on("heartbeat", (data) => {
   if (!gameStarted) return;
 
+  let list = document.createElement('div')
+  document.getElementById("playerList").innerHTML ="<h4>Top 10</h4>"
   // Update positions and radiuses
   for (let id in data.players) {
     if (id !== socket.id && players[id]) {
@@ -78,8 +81,30 @@ socket.on("heartbeat", (data) => {
         data.players[id].block.col,
       ];
     }
+  
   }
+  
+  var sortable = [];
+  for (var player in players) {
+      sortable.push([players[player].radius,players[player].nick]);
+  }
+
+  sortable.sort(function(a, b) {
+      return b[0] - a[0];
+  });
+  let j = 0; 
+  for (let id in sortable) {
+    if(j<9){
+      let name = document.createElement('tr')
+      name.innerHTML = "<td>"+sortable[id][1]+"</td><td>"+floor(sortable[id][0]*2)+"</td>"
+      list.appendChild(name)
+      j++;
+    }else break;
+  }
+  document.getElementById("playerList").appendChild(list)
+ 
 });
+
 
 socket.on("newPlayer", (data) => {
   // Create new player
@@ -94,11 +119,11 @@ socket.on("newPlayer", (data) => {
 
   // Update players stats
   document.getElementById("playersStats").innerHTML =
-    "<h3>Players: " + Object.keys(players).length + "</h3>";
+    "<h3>Total Players: " + Object.keys(players).length + "</h3>";
 });
 
 socket.on("gameOver", (id) => {
-  // Update players stats
+  location.reload()
   ui.gameOver();
 });
 
@@ -124,6 +149,7 @@ socket.on("removeBlob", (data) => {
   // Delete blob
   if (data.id !== socket.id) blobs.splice(data.i, 1);
 });
+
 
 socket.on("newBlob", (data) => {
   // Add blob

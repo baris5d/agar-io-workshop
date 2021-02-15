@@ -70,6 +70,7 @@ function draw() {
   }
 
   if (!players[socket.id]) return ui.loading()
+ 
 
   // Clear previous canvas
   clear()
